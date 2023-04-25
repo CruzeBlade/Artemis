@@ -305,6 +305,14 @@
                 *ngIf="gradedParticipation?.initializationState === InitializationState.INITIALIZED"
                 [routerLink]="['/courses', courseId, 'text-exercises', exercise.id, 'participate', gradedParticipation!.id]"
             ></button>
+            <button
+                [id]="'print-exercise-' + exercise.id"
+                jhi-exercise-action-button
+                [buttonIcon]="faPrint"
+                [buttonLabel]="'artemisApp.exerciseActions.printExercise' | artemisTranslate"
+                [smallButton]="smallButtons"
+                [hideLabelMobile]="false"
+            ></button>
         </div>
         <!-- ACTIONS END -->
         <!-- INFORMATION START -->
