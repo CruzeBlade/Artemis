@@ -30,6 +30,24 @@ services:
             file: ./mysql.yml
             service: mysql
 
+    phpmyadmin:
+        container_name: artemis-phpmyadmin
+        image: phpmyadmin:latest
+        pull_policy: always
+
+        ports:
+            - "8081:80"
+
+        expose:
+            - "80"
+
+        links:
+            - "mysql:db"
+
+        networks:
+            - artemis
+
+
 networks:
     artemis:
         driver: "bridge"
