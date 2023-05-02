@@ -1,5 +1,6 @@
 import { Component, ContentChild, HostBinding, Input, OnChanges, OnInit, TemplateRef } from '@angular/core';
 import { Router } from '@angular/router';
+import { SafeHtml } from '@angular/platform-browser';
 import { AlertService } from 'app/core/util/alert.service';
 import { HttpClient } from '@angular/common/http';
 import { SourceTreeService } from 'app/exercises/programming/shared/service/sourceTree.service';
@@ -16,8 +17,14 @@ import { faComment, faExternalLinkAlt, faEye, faFolderOpen, faPlayCircle, faPrin
 import { CourseExerciseService } from 'app/exercises/shared/course-exercises/course-exercise.service';
 import { TranslateService } from '@ngx-translate/core';
 import { ParticipationService } from 'app/exercises/shared/participation/participation.service';
+import { ArtemisMarkdownService } from 'app/shared/markdown.service';
 import dayjs from 'dayjs/esm';
 import { QuizExercise } from 'app/entities/quiz/quiz-exercise.model';
+import htmlToPdfmake from 'html-to-pdfmake';
+import * as pdfMake from 'pdfmake/build/pdfmake';
+import * as pdfFonts from 'pdfmake/build/vfs_fonts';
+
+(<any>pdfMake).vfs = pdfFonts.pdfMake.vfs;
 
 @Component({
     selector: 'jhi-exercise-details-student-actions',
@@ -67,6 +74,7 @@ export class ExerciseDetailsStudentActionsComponent implements OnInit, OnChanges
         private router: Router,
         private translateService: TranslateService,
         private participationService: ParticipationService,
+        private markdownService: ArtemisMarkdownService,
     ) {}
 
     ngOnInit(): void {
@@ -245,5 +253,35 @@ export class ExerciseDetailsStudentActionsComponent implements OnInit, OnChanges
 
     buildPlanUrl(participation: StudentParticipation) {
         return (participation as ProgrammingExerciseStudentParticipation).buildPlanUrl;
+    }
+
+    public async downloadPDF(): Promise<void> {
+        if (!this.exercise.problemStatement) return;
+        const safeHTML: SafeHtml = this.markdownService.safeHtmlForMarkdown(this.exercise.problemStatement);
+        const ret: any = htmlToPdfmake(
+            `
+        <!DOCTYPE html>
+        <!-- KaTeX requires the use of the HTML5 doctype. Without it, KaTeX may not render properly -->
+        <html>
+          <head>
+            <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.7/dist/katex.min.css" integrity="sha384-3UiQGuEI4TTMaFmGIZumfRPtfKQ3trwQE2JgosJxCnGmQpL/lJdjpcHkaaFwHlcI" crossorigin="anonymous">
+        
+            <!-- The loading of KaTeX is deferred to speed up page rendering -->
+            <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.7/dist/katex.min.js" integrity="sha384-G0zcxDFp5LWZtDuRMnBkk3EphCK1lhEf4UEyEM693ka574TZGwo4IWwS6QLzM/2t" crossorigin="anonymous"></script>
+        
+            <!-- To automatically render math in text elements, include the auto-render extension: -->
+            <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.7/dist/contrib/auto-render.min.js" integrity="sha384-+VBxd3r6XgURycqtZ117nYw44OOcIax56Z4dCRWbxyPt0Koah1uHoK0o4+/RRE05" crossorigin="anonymous"
+                onload="renderMathInElement(document.body);"></script>
+          </head>
+          <body>
+            ${safeHTML['changingThisBreaksApplicationSecurity']} 
+          </body>
+        </html>`,
+            {
+                imagesByReference: true,
+            },
+        );
+        console.log(ret);
+        pdfMake.createPdf({ content: ret.content, images: ret.images }).download();
     }
 }

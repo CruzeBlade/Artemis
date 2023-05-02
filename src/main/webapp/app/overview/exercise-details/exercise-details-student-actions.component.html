@@ -305,14 +305,6 @@
                 *ngIf="gradedParticipation?.initializationState === InitializationState.INITIALIZED"
                 [routerLink]="['/courses', courseId, 'text-exercises', exercise.id, 'participate', gradedParticipation!.id]"
             ></button>
-            <button
-                [id]="'print-exercise-' + exercise.id"
-                jhi-exercise-action-button
-                [buttonIcon]="faPrint"
-                [buttonLabel]="'artemisApp.exerciseActions.printExercise' | artemisTranslate"
-                [smallButton]="smallButtons"
-                [hideLabelMobile]="false"
-            ></button>
         </div>
         <!-- ACTIONS END -->
         <!-- INFORMATION START -->
@@ -343,6 +335,20 @@
             ></button>
         </div>
         <!-- INFORMATION END -->
+        <!-- SECONDARY ACTIONS START -->
+        <div class="btn-group">
+            <button
+                [id]="'print-exercise-' + exercise.id"
+                jhi-exercise-action-button
+                [outlined]="true"
+                [buttonIcon]="faPrint"
+                [buttonLabel]="'artemisApp.exerciseActions.printExercise' | artemisTranslate"
+                [smallButton]="smallButtons"
+                [hideLabelMobile]="false"
+                (click)="downloadPDF()"
+            ></button>
+        </div>
+        <!-- SECONDARY ACTIONS END -->
     </ng-container>
     <!-- TEXT EXERCISE ACTIONS END -->
 
@@ -412,6 +418,20 @@
             ></button>
         </div>
         <!-- INFORMATION END -->
+        <!-- SECONDARY ACTIONS START -->
+        <div class="btn-group">
+            <button
+                [id]="'print-exercise-' + exercise.id"
+                jhi-exercise-action-button
+                [outlined]="true"
+                [buttonIcon]="faPrint"
+                [buttonLabel]="'artemisApp.exerciseActions.printExercise' | artemisTranslate"
+                [smallButton]="smallButtons"
+                [hideLabelMobile]="false"
+                (click)="downloadPDF()"
+            ></button>
+        </div>
+        <!-- SECONDARY ACTIONS END -->
     </ng-container>
     <!-- FILE UPLOAD EXERCISE ACTIONS END -->
 </div>
