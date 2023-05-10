@@ -1,6 +1,5 @@
 import { Component, ContentChild, HostBinding, Input, OnChanges, OnInit, TemplateRef } from '@angular/core';
 import { Router } from '@angular/router';
-import { SafeHtml } from '@angular/platform-browser';
 import { AlertService } from 'app/core/util/alert.service';
 import { HttpClient } from '@angular/common/http';
 import { SourceTreeService } from 'app/exercises/programming/shared/service/sourceTree.service';
@@ -26,6 +25,7 @@ import * as pdfFonts from 'pdfmake/build/vfs_fonts';
 import showdown from 'showdown';
 import showdownKatex from 'showdown-katex';
 import showdownHighlight from 'showdown-highlight';
+import puppeteer from 'puppeteer';
 
 (<any>pdfMake).vfs = pdfFonts.pdfMake.vfs;
 
@@ -270,19 +270,18 @@ export class ExerciseDetailsStudentActionsComponent implements OnInit, OnChanges
             ],
         });
         const html = converter.makeHtml(this.exercise.problemStatement);
-        const ret: any = htmlToPdfmake(html, {
-            // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-            // @ts-ignore
-            imagesByReference: true,
-        });
-        pdfMake.createPdf({ content: ret.content, images: ret.images }).download();
 
-        /*const safeHTML: SafeHtml = this.markdownService.safeHtmlForMarkdown(this.exercise.problemStatement);
-        const ret: any = htmlToPdfmake(safeHTML['changingThisBreaksApplicationSecurity'], {
-            // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-            // @ts-ignore
-            imagesByReference: true,
+        const browser = await puppeteer.launch();
+        const page = await browser.newPage();
+        await page.setContent(html, { waitUntil: 'domcontentloaded' });
+        await page.emulateMediaType('print');
+        const pdf = await page.pdf({
+            path: 'problemDescription.pdf',
+            margin: { top: '100px', right: '50px', bottom: '100px', left: '50px' },
+            printBackground: true,
+            format: 'A4',
         });
-        pdfMake.createPdf({ content: ret.content, images: ret.images }).download();*/
+
+        await browser.close();
     }
 }
