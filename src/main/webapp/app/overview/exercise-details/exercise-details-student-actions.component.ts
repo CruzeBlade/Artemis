@@ -19,15 +19,10 @@ import { ParticipationService } from 'app/exercises/shared/participation/partici
 import { ArtemisMarkdownService } from 'app/shared/markdown.service';
 import dayjs from 'dayjs/esm';
 import { QuizExercise } from 'app/entities/quiz/quiz-exercise.model';
-import htmlToPdfmake from 'html-to-pdfmake';
-import * as pdfMake from 'pdfmake/build/pdfmake';
-import * as pdfFonts from 'pdfmake/build/vfs_fonts';
 import showdown from 'showdown';
 import showdownKatex from 'showdown-katex';
 import showdownHighlight from 'showdown-highlight';
-import puppeteer from 'puppeteer';
-
-(<any>pdfMake).vfs = pdfFonts.pdfMake.vfs;
+import { SafeHtml } from '@angular/platform-browser';
 
 @Component({
     selector: 'jhi-exercise-details-student-actions',
@@ -271,17 +266,14 @@ export class ExerciseDetailsStudentActionsComponent implements OnInit, OnChanges
         });
         const html = converter.makeHtml(this.exercise.problemStatement);
 
-        const browser = await puppeteer.launch();
-        const page = await browser.newPage();
-        await page.setContent(html, { waitUntil: 'domcontentloaded' });
-        await page.emulateMediaType('print');
-        const pdf = await page.pdf({
-            path: 'problemDescription.pdf',
-            margin: { top: '100px', right: '50px', bottom: '100px', left: '50px' },
-            printBackground: true,
-            format: 'A4',
-        });
+        /*const safeHTML: SafeHtml = this.markdownService.safeHtmlForMarkdown(this.exercise.problemStatement);
+        const html = safeHTML['changingThisBreaksApplicationSecurity'];*/
 
-        await browser.close();
+        const myWindow = window.open('', 'MsgWindow', 'width=200, height=200');
+        myWindow?.document.write(`<html><head><link rel="stylesheet" href="styles.css"></head><body>`);
+        myWindow?.document.write(html);
+        myWindow?.document.write('</body></html>');
+        myWindow?.document.close();
+        //myWindow?.print();
     }
 }
